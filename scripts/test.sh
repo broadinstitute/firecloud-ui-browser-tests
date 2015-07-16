@@ -30,7 +30,7 @@ DO_testDocker() {
     echo "## Testing in Docker ##"
     echo "#######################"
     echo ""
-    docker build -t fc/fcuitest .
+    docker build --no-cache=true -t fc-fcuitest .
 }
 
 DO_testMac() {

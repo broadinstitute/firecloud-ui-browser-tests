@@ -6,15 +6,13 @@ USER root
 
 # Basics
 RUN apt-get update && apt-get install -y \
- git \
- curl \
  xvfb \
- wget
+ wget \
+ && apt-get clean \
+ && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 RUN mkdir /fcuitest
 COPY . /fcuitest/ 
-
-RUN alias ls='ls -al'
 
 ENV LEIN_ROOT true
 
