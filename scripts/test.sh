@@ -12,12 +12,11 @@ IFS=$'\n\t'
 EXPECTED_ARGS=1
 E_BADARGS=64
 
-lin_url="http://chromedriver.storage.googleapis.com/2.15/chromedriver_linux64.zip"
 mac_url="http://chromedriver.storage.googleapis.com/2.15/chromedriver_mac32.zip"
 win_url="http://chromedriver.storage.googleapis.com/2.15/chromedriver_win32.zip"
 
 DO_showUsage() {
-    echo "Usage: $(basename $0) {linux|mac|win}"
+    echo "Usage: $(basename $0) {docker|mac|win}"
     exit $E_BADARGS
 }
 
@@ -25,17 +24,13 @@ if [ $# -ne $EXPECTED_ARGS ]; then
     DO_showUsage
 fi
 
-DO_testLinux() {
+DO_testDocker() {
     echo ""
-    echo "######################"
-    echo "## Testing on Linux ##"
-    echo "######################"
+    echo "#######################"
+    echo "## Testing in Docker ##"
+    echo "#######################"
     echo ""
-    mkdir -p target
-    if [ ! -f target/chromedriver ]; then
-        curl -sS $lin_url > target/driver.zip && unzip target/driver.zip && rm target/driver.zip && mv chromedriver target/
-    fi
-    lein with-profile linux test
+    docker build --no-cache=true -t fc-fcuitest .
 }
 
 DO_testMac() {
@@ -65,8 +60,8 @@ DO_testWin() {
 }
 
 case "$1" in
-    linux)
-        DO_testLinux
+    docker)
+        DO_testDocker
         ;;
     mac)
         DO_testMac

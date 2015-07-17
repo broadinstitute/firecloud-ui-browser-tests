@@ -1,26 +1,29 @@
-FROM centos:7
+FROM selenium/standalone-chrome:2.46.0
 
-RUN curl https://raw.githubusercontent.com/technomancy/leiningen/stable/bin/lein > /usr/bin/lein
-RUN chmod 755 /usr/bin/lein
+MAINTAINER Silver Team <silver@broadinstitute.org>
 
-RUN echo -e '[google-chrome]\n\
-name=google-chrome\n\
-baseurl=http://dl.google.com/linux/chrome/rpm/stable/$basearch\n\
-enabled=1\n\
-gpgcheck=1\n\
-gpgkey=https://dl-ssl.google.com/linux/linux_signing_key.pub\n\
-' > /etc/yum.repos.d/google-chrome.repo
+USER root
 
-RUN yum -y install  google-chrome-stable unzip GConf2 java-1.8.0-openjdk && yum clean all
+# Basics
+RUN apt-get update && apt-get install -y \
+ xvfb \
+ wget \
+ && apt-get clean \
+ && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-ADD resources /usr/firecloud-ui-browser-tests/resources
-ADD scripts /usr/firecloud-ui-browser-tests/scripts
-ADD src /usr/firecloud-ui-browser-tests/src
-ADD test  /usr/firecloud-ui-browser-tests/test
-ADD project.clj /usr/firecloud-ui-browser-tests/
-ADD profiles.clj /usr/firecloud-ui-browser-tests/
-WORKDIR /usr/firecloud-ui-browser-tests/
+RUN mkdir /fcuitest
+COPY . /fcuitest/ 
 
-#RUN lein clean
-#RUN ./scripts/test.sh linux
+ENV LEIN_ROOT true
 
+RUN wget -q -O /usr/bin/lein \
+    https://raw.githubusercontent.com/technomancy/leiningen/stable/bin/lein \
+    && chmod +x /usr/bin/lein
+
+# Clean project
+WORKDIR /fcuitest
+RUN lein clean
+
+# Test Execution
+WORKDIR /fcuitest
+RUN xvfb-run lein with-profile docker test
